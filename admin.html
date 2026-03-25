@@ -55,7 +55,7 @@
     <script src="script.js"></script>
     <script>
         // Kiểm tra quyền Admin khi vào trang
-        if(sessionStorage.getItem('staffRole') !== 'Admin') {
+        if(sessionStorage.getItem('staffRole') !== 'Quản lý') {
             alert("Bạn không có quyền!"); window.location.href = "index.html";
         }
         $(document).ready(() => loadAdminDashboard());
