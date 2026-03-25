@@ -57,11 +57,74 @@ function showApp() {
     const adminUrl = currentUrl; 
     window.location.href = adminUrl;
   }
+// --- Load dữ liệu tại trang Admin
+async function loadAdminDashboard() {
+    try {
+        // 1. Gọi API để lấy toàn bộ dữ liệu từ Google Apps Script
+        const response = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "getAdminData" })
+        });
+        const data = await response.json();
 
-  //function logout() {
-  //  sessionStorage.clear(); // Xóa sạch bộ nhớ phiên
-  //  location.reload(true);      // Tải lại trang để về màn hình đăng nhập
-  //}
+        if (!data || !data.logs) {
+            console.error("Không có dữ liệu trả về");
+            return;
+        }
+
+        // 2. Cập nhật các con số trên Dashboard (Thẻ màu)
+        const stats = data.stats;
+        document.getElementById('count-active').innerText = stats.totalDevices;
+        document.getElementById('count-broken').innerText = stats.brokenCount;
+        document.getElementById('count-water').innerText = stats.waterCount;
+
+        // 3. Xử lý dữ liệu bảng Logs
+        const logsBody = document.getElementById('logsBody');
+        logsBody.innerHTML = ""; // Xóa dữ liệu cũ
+
+        // data.logs[0] thường là Header, chúng ta lấy từ dòng index 1
+        const rows = data.logs.slice(1); 
+
+        rows.forEach(row => {
+            const tr = document.createElement('tr');
+            
+            // Định dạng ngày tháng cho dễ nhìn
+            const date = new Date(row[0]).toLocaleString('vi-VN');
+            const deviceId = row[1];
+            const staffName = row[2];
+            const value = row[3];
+            const imgUrl = row[4];
+            const status = row[5];
+
+            tr.innerHTML = `
+                <td>${date}</td>
+                <td><span class="badge bg-secondary">${deviceId}</span></td>
+                <td>${staffName}</td>
+                <td class="fw-bold text-primary">${value} m³</td>
+                <td>
+                    ${imgUrl !== "No Image" 
+                        ? `<img src="${imgUrl}" class="img-thumbnail" style="width:50px; cursor:pointer" onclick="window.open('${imgUrl}')">` 
+                        : "N/A"}
+                </td>
+                <td><span class="badge ${status.includes('Lỗi') ? 'bg-danger' : 'bg-success'}">${status}</span></td>
+            `;
+            logsBody.appendChild(tr);
+        });
+
+        // 4. Kích hoạt DataTables để hỗ trợ tìm kiếm/phân trang
+        $('#logsTable').DataTable({
+            destroy: true, // Hỗ trợ tải lại dữ liệu mà không lỗi
+            order: [[0, 'desc']], // Mới nhất hiện lên đầu
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json"
+            }
+        });
+
+    } catch (error) {
+        console.error("Lỗi khi tải Dashboard:", error);
+        Swal.fire('Lỗi', 'Không thể kết nối dữ liệu Database', 'error');
+    }
+}
 // --- CHỤP & NÉN ẢNH ---
 let base64Image = "";
 document.getElementById('camInput')?.addEventListener('change', function(e) {
