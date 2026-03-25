@@ -155,6 +155,12 @@ async function loadAdminDashboard() {
 
             rows.forEach(row => {
                 const tr = document.createElement('tr');
+                // Thay đổi link ảnh để hiển thị được trên web
+                let displayImg = row[5];
+                if (displayImg && displayImg.includes("drive.google.com")) {
+                    // Chuyển link view thành link lấy ảnh trực tiếp
+                    displayImg = displayImg.replace("file/d/", "uc?export=view&id=").replace("/view?usp=sharing", "");
+                }
                 tr.innerHTML = `
                     <td>${row[3] ? new Date(row[3]).toLocaleString('vi-VN') : '---'}</td>
                     <td><span class="badge bg-info">${row[1] || 'N/A'}</span></td>
@@ -162,7 +168,7 @@ async function loadAdminDashboard() {
                     <td class="fw-bold">${row[4] || 0} m³</td>
                     <td>
                         ${(row[5] && row[5] !== "No Image") 
-                            ? `<img src="${row[5]}" style="width:40px; border-radius:4px; cursor:pointer" onclick="window.open('${row[5]}')">` 
+                            ? `<img src="${displayImg}" style="width:50px; height:50px; object-fit:cover; border-radius:4px; cursor:pointer" onclick="window.open('${row[5]}')">` 
                             : "---"}
                     </td>
                     <td><span class="badge ${row[7] === 'Hoàn thành' ? 'bg-success' : 'bg-warning'}">${row[7] || 'Chờ'}</span></td>
@@ -170,7 +176,6 @@ async function loadAdminDashboard() {
                 logsBody.appendChild(tr);
             });
         }
-
         // Khởi tạo DataTable
         if ($.fn.DataTable.isDataTable('#logsTable')) {
             $('#logsTable').DataTable().destroy();
