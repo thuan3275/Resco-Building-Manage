@@ -25,7 +25,8 @@ function showApp() {
     document.getElementById('appSection').style.display = 'block';
     
     // Hiển thị lời chào và nút Đăng xuất
-    const showInfo = "<div class='alert alert-info d-flex justify-content-between align-items-center'><span>Chào, <b>${name}</b> (${role})</span><button class='btn btn-sm btn-outline-danger' onclick='logout()'>Đăng xuất</button></div>";
+    const showInfo = "<div class='alert alert-info d-flex justify-content-between align-items-center'><span>Chào, <b>";
+    showInfo +=${name} +"</b> ( " + ${role} +" )</span><button class='btn btn-sm btn-outline-danger' onclick='logout()'>Đăng xuất</button></div>";
     document.getElementById('userInfo').innerHTML = showInfo;
 
     // Nếu là Admin, hiển thị thêm nút chuyển hướng nhanh
