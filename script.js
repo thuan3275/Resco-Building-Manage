@@ -225,6 +225,17 @@ async function uploadData() {
     alert(res.message + (res.aiResult ? "\nAI đọc được: " + res.aiResult : ""));
     location.reload();*/
 
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const extraData = {
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                acc: pos.coords.accuracy
+            };
+            sendToServer(extraData);
+        }, () => sendToServer({})); // Gửi không có GPS nếu người dùng từ chối
+    }
+    
     const payload = {
         action: "saveRecord",
         deviceId: document.getElementById('deviceId').value,
