@@ -57,8 +57,64 @@ function showApp() {
     const adminUrl = currentUrl; 
     window.location.href = adminUrl;
   }
-// --- Load dữ liệu tại trang Admin
+/**
+ * TỐI ƯU 3: Tải song song dữ liệu Dashboard và Logs
+ */
 async function loadAdminDashboard() {
+    showLoading(true); // Hiển thị spinner
+    
+    try {
+        // Tải song song (Parallel Fetching)
+        const [statsResponse, logsResponse] = await Promise.all([
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "getDashboardStats" }) }),
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "readData", sheetName: "MeterReadings" }) })
+        ]);
+
+        const stats = await statsResponse.json();
+        const logsData = await logsResponse.json();
+
+        // Hiển thị Stats
+        document.getElementById('dash-total').innerText = stats.totalDevices;
+        document.getElementById('dash-broken').innerText = stats.brokenCount;
+        document.getElementById('dash-water').innerText = stats.waterCount;
+
+        // Render Table (Tối ưu: Chỉ render 50 bản ghi mới nhất trước)
+        renderLogsTable(logsData.slice(1).reverse().slice(0, 50));
+
+    } catch (error) {
+        console.error("Lỗi tải dữ liệu:", error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+function renderLogsTable(data) {
+    const tableBody = document.getElementById('logsBody');
+    // Dùng DocumentFragment để tối ưu việc chèn hàng nghìn dòng vào DOM
+    const fragment = document.createDocumentFragment();
+    
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${new Date(row[3]).toLocaleString()}</td>
+            <td>${row[1]}</td>
+            <td>${row[4]} m³</td>
+            <td><a href="${row[5]}" target="_blank">Xem ảnh</a></td>
+            <td><span class="badge ${row[7] === 'Chờ duyệt' ? 'bg-warning' : 'bg-success'}">${row[7]}</span></td>
+        `;
+        fragment.appendChild(tr);
+    });
+    
+    tableBody.innerHTML = "";
+    tableBody.appendChild(fragment);
+    
+    // Khởi tạo Datatable (Chỉ làm 1 lần)
+    if (!$.fn.DataTable.isDataTable('#logsTable')) {
+        $('#logsTable').DataTable({ pageLength: 10, order: [[0, "desc"]] });
+    }
+}
+// --- Load dữ liệu tại trang Admin
+/*async function loadAdminDashboard() {
     try {
         // 1. Gọi API để lấy toàn bộ dữ liệu từ Google Apps Script
         const response = await fetch(API_URL, {
@@ -125,6 +181,7 @@ async function loadAdminDashboard() {
         Swal.fire('Lỗi', 'Không thể kết nối dữ liệu Database', 'error');
     }
 }
+*/
 // --- CHỤP & NÉN ẢNH ---
 let base64Image = "";
 document.getElementById('camInput')?.addEventListener('change', function(e) {
