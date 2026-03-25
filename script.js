@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzDIF_Cwxpjztl3w2KuO_Qm0HxUdzBENmF--jSWaSszTK8AzpMU5pU0YfU0fc4Whuv1/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzcIrLYD5FPp91yhtCWAC0A4wapwOwWk_OdlEH1NPBICCpcWIqws719nw8IkRBlTHPo/exec";
 let base64Image = "";
 
 // KIỂM TRA ĐĂNG NHẬP NGAY KHI TẢI TRANG
