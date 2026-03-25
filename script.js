@@ -1,4 +1,4 @@
-const API_URL = "DÁN_LINK_DEPLOY_GOOGLE_APPS_SCRIPT_CỦA_BẠN_VÀO_ĐÂY";
+const API_URL = "AKfycbwn6nIqNxEliqlnRBHwVoxoEA5ItvOxJpW5GdfPifq-6_uLSHVHA5tm-ydN4g_R6Tan";
 
 // --- XỬ LÝ ĐĂNG NHẬP ---
 async function handleLogin() {
