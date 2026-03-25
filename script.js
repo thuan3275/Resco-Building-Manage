@@ -36,12 +36,12 @@ async function handleLogin() {
     }
 }
 function showApp() { 
-    document.getElementById('loginSection').style.display = 'none';
-    document.getElementById('appSection').style.display = 'block';
-    
     const name = sessionStorage.getItem('staffName');
     const role = sessionStorage.getItem('staffRole');
 
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('appSection').style.display = 'block';
+    
     document.getElementById('userInfo').innerHTML = `
         <div class="alert alert-primary d-flex justify-content-between align-items-center p-2 mb-0 w-100">
             <span class="small">Chào, <b>${name}</b></span>
