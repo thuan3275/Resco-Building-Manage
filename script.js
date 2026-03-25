@@ -25,12 +25,12 @@ function showApp() {
     document.getElementById('appSection').style.display = 'block';
     
     // Hiển thị lời chào và nút Đăng xuất
-    document.getElementById('userInfo').innerHTML = '
+    document.getElementById('userInfo').innerHTML = "
       <div class="alert alert-info d-flex justify-content-between align-items-center">
         <span>Chào, <b>${name}</b> (${role})</span>
         <button class="btn btn-sm btn-outline-danger" onclick="logout()">Đăng xuất</button>
       </div>
-    ';
+    ";
 
     // Nếu là Admin, hiển thị thêm nút chuyển hướng nhanh
     if (role === 'Admin' || role === 'Quản lý') {
