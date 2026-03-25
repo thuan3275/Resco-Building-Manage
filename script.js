@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwn6nIqNxEliqlnRBHwVoxoEA5ItvOxJpW5GdfPifq-6_uLSHVHA5tm-ydN4g_R6Tan/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzgMbNTDgGWn8wl6owJ93Wv5anuwRGNBvWYbgzMAnnwFqABOH6bItCJgXfBaP3kycM3/exec";
 
 // --- XỬ LÝ ĐĂNG NHẬP ---
 async function handleLogin() {
@@ -93,7 +93,7 @@ async function uploadData() {
     btn.disabled = true;
     btn.innerText = "Đang gửi...";
 
-    const data = {
+   /* const data = {
         action: "saveRecord",
         deviceId: document.getElementById('deviceId').value,
         value: document.getElementById('meterValue').value,
@@ -103,7 +103,30 @@ async function uploadData() {
 
     const res = await callAPI(data);
     alert(res.message + (res.aiResult ? "\nAI đọc được: " + res.aiResult : ""));
-    location.reload();
+    location.reload();*/
+
+    const payload = {
+        action: "saveRecord",
+        deviceId: document.getElementById('deviceId').value,
+        value: document.getElementById('meterValue').value,
+        image: base64Image, // Chuỗi base64 đã nén
+        staffId: sessionStorage.getItem('staffId')
+    };
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            mode: "cors", // Quan trọng khi dùng Vercel
+            body: JSON.stringify(payload)
+        });
+        const res = await response.json();
+        
+        Swal.fire('Thành công', res.message, 'success').then(() => {
+            location.reload();
+        });
+    } catch (err) {
+        Swal.fire('Lỗi', 'Không thể kết nối với server Google', 'error');
+    }
 }
 
 // --- HÀM GỌI API CHUNG ---
@@ -113,9 +136,4 @@ async function callAPI(payload) {
         body: JSON.stringify(payload)
     });
     return await response.json();
-}
-
-function logout() {
-    sessionStorage.clear();
-    window.location.href = "index.html";
 }
