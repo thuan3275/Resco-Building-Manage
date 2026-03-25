@@ -270,47 +270,6 @@ async function uploadData() {
         showLoading(false);
     }
 }
-/*
-async function uploadData() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const extraData = {
-                lat: pos.coords.latitude,
-                lng: pos.coords.longitude,
-                acc: pos.coords.accuracy
-            };
-            sendToServer(extraData);
-        }, () => sendToServer({})); // Gửi không có GPS nếu người dùng từ chối
-    }
-    const btn = document.getElementById('btnSubmit');
-    btn.disabled = true;
-    btn.innerText = "Đang gửi...";
-    
-    
-    const payload = {
-        action: "saveRecord",
-        deviceId: document.getElementById('deviceId').value,
-        value: document.getElementById('meterValue').value,
-        image: base64Image, // Chuỗi base64 đã nén
-        staffId: sessionStorage.getItem('staffId')
-    };
-
-    try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            mode: "cors", // Quan trọng khi dùng Vercel
-            body: JSON.stringify(payload)
-        });
-        const res = await response.json();
-        
-        Swal.fire('Thành công', res.message, 'success').then(() => {
-            location.reload();
-        });
-    } catch (err) {
-        Swal.fire('Lỗi', 'Không thể kết nối với server Google', 'error');
-    }
-}
-*/
 // --- HÀM GỌI API CHUNG ---
 async function callAPI(payload) {
     try {
