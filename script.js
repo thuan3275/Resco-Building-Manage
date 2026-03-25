@@ -42,12 +42,13 @@ function showApp() {
         cancelButtonText: 'Ở lại nhập liệu'
       }).then((result) => {
         if (result.isConfirmed) {
-          goToAdmin(window.location.href);
+          goToAdmin();
         }
       });
     }
   }
-  function goToAdmin(currentUrl) {
+  function goToAdmin() {
+    let currentUrl = window.location.href;
     if(currentUrl.includes("index"))
         currentUrl = currentUrl.replace("index","admin");
       else
