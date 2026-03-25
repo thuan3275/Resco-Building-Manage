@@ -1,32 +1,57 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbzDIF_Cwxpjztl3w2KuO_Qm0HxUdzBENmF--jSWaSszTK8AzpMU5pU0YfU0fc4Whuv1/exec";
+let base64Image = "";
 
+// KIỂM TRA ĐĂNG NHẬP NGAY KHI TẢI TRANG
+document.addEventListener("DOMContentLoaded", () => {
+    const savedId = sessionStorage.getItem('employeeID');
+    if (savedId) {
+        showApp(); // Nếu đã có session, vào thẳng App
+    }
+});
 // --- XỬ LÝ ĐĂNG NHẬP ---
 async function handleLogin() {
     const id = document.getElementById('staffId').value;
-    if(!id) return alert("Vui lòng nhập mã!");
+    if (!id) return Swal.fire('Lỗi', 'Vui lòng nhập mã nhân viên!', 'error');
 
-    const res = await callAPI({ action: "login", staffId: id });
-    if(res.success) {
-        sessionStorage.setItem('staffId', id);
-        sessionStorage.setItem('staffName', res.name);
-        sessionStorage.setItem('staffRole', res.role);
-        //alert("Thành công nhập mã!");
-        showApp();
-        //location.reload(true);
-    } else {
-        alert(res.message);
+    showLoading(true);
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "login", staffId: id })
+        });
+        const res = await response.json();
+
+        if (res.success) {
+            sessionStorage.setItem('employeeID', res.employeeID);
+            sessionStorage.setItem('staffName', res.fullName);
+            sessionStorage.setItem('staffRole', res.role);
+            showApp();
+        } else {
+            Swal.fire('Thất bại', res.message, 'error');
+        }
+    } catch (e) {
+        Swal.fire('Lỗi', 'Không thể kết nối Server', 'error');
+    } finally {
+        showLoading(false);
     }
 }
 function showApp() { 
-    const role = sessionStorage.getItem('staffRole');
-    const name = sessionStorage.getItem('staffName');
-
     document.getElementById('loginSection').style.display = 'none';
     document.getElementById('appSection').style.display = 'block';
     
-    // Hiển thị lời chào và nút Đăng xuất
+    const name = sessionStorage.getItem('staffName');
+    const role = sessionStorage.getItem('staffRole');
+
+    document.getElementById('userInfo').innerHTML = `
+        <div class="alert alert-primary d-flex justify-content-between align-items-center p-2 mb-0 w-100">
+            <span class="small">Chào, <b>${name}</b></span>
+            <button class="btn btn-sm btn-outline-danger border-0" onclick="logout()">Thoát</button>
+        </div>
+    `;
+
+    /*// Hiển thị lời chào và nút Đăng xuất
     let showInfo = "<div class='alert alert-info d-flex justify-content-between align-items-center'><span>Chào, <b> " + name + "</b> ( "+ role+" )</span><button class='btn btn-sm btn-outline-danger' onclick='logout()'>Đăng xuất</button></div>";
-    document.getElementById('userInfo').innerHTML = showInfo;
+    document.getElementById('userInfo').innerHTML = showInfo;*/
 
     // Nếu là Admin, hiển thị thêm nút chuyển hướng nhanh
     if (role === 'Admin' || role === 'Quản lý') {
@@ -47,6 +72,8 @@ function showApp() {
       });
     }
   }
+
+// Đi đến trang Admin
   function goToAdmin() {
     let currentUrl = window.location.href;
     if(currentUrl.includes("index"))
@@ -57,6 +84,39 @@ function showApp() {
     const adminUrl = currentUrl; 
     window.location.href = adminUrl;
   }
+
+// Xử lý nén ảnh khi chọn file
+document.getElementById('camInput')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 800;
+            let scale = MAX_WIDTH / img.width;
+            canvas.width = MAX_WIDTH;
+            canvas.height = img.height * scale;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Lưu base64 nén 70%
+            base64Image = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+            
+            // Hiển thị preview
+            const preview = document.getElementById('preview');
+            preview.src = canvas.toDataURL('image/jpeg');
+            preview.style.display = "block";
+            document.getElementById('camPlaceholder').style.display = "none";
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+});
+
+// Load trang Admin
 async function loadAdminDashboard() {
     showLoading(true); 
     
@@ -153,119 +213,72 @@ function renderLogsTable(data) {
         $('#logsTable').DataTable({ pageLength: 10, order: [[0, "desc"]] });
     }
 }
+
+function logout() {
+    sessionStorage.clear();
+    window.location.reload();
+}
 // Hàm hiển thị/ẩn hiệu ứng Loading
-function showLoading(isLoading) {
-    if (isLoading) {
-        Swal.fire({
-            title: 'Đang xử lý...',
-            html: 'Vui lòng chờ trong giây lát',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
+function showLoading(status) {
+    if (status) {
+        Swal.fire({ title: 'Đang gửi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     } else {
         Swal.close();
     }
 }
-// --- CHỤP & NÉN ẢNH ---
-let base64Image = "";
-document.getElementById('camInput')?.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        const img = new Image();
-        img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 800;
-            let scale = MAX_WIDTH / img.width;
-            canvas.width = MAX_WIDTH;
-            canvas.height = img.height * scale;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            base64Image = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-            const preview = document.getElementById('preview');
-            preview.src = canvas.toDataURL('image/jpeg');
-            preview.style.display = "block";
-        };
-        img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-});
 
-// --- GỬI DỮ LIỆU ---
+// HÀM GỬI DỮ LIỆU CHÍNH
 async function uploadData() {
     // 1. Kiểm tra dữ liệu đầu vào cơ bản
     const deviceId = document.getElementById('deviceId').value;
     const meterValue = document.getElementById('meterValue').value;
     const staffId = sessionStorage.getItem('employeeID'); // Lấy từ session khi login
-
-    if (!deviceId || !meterValue) {
-        return Swal.fire('Thông báo', 'Vui lòng nhập đầy đủ Mã thiết bị và Chỉ số!', 'warning');
+   
+    if (!deviceId || !meterValue || !base64Image) {
+        return Swal.fire('Thiếu thông tin', 'Vui lòng nhập ID, chỉ số và chụp ảnh!', 'warning');
     }
 
-    if (!base64Image) {
-        return Swal.fire('Thông báo', 'Vui lòng chụp ảnh đồng hồ!', 'warning');
-    }
-
-    // 2. Hiện hiệu ứng chờ (Hàm showLoading đã thêm ở bước trước)
     showLoading(true);
 
     try {
-        // 3. Lấy tọa độ GPS (Hỗ trợ truy vết vị trí ghi số)
+        // 2. Lấy tọa độ GPS (Đã đổi tên biến để tránh lỗi reload)
         const getGPS = () => new Promise((resolve) => {
-            let defaultLoc = { lat: 0, lng: 0, acc: 0 }; // Đổi tên ở đây
-            if (!navigator.geolocation) return resolve(defaultLoc);
-            
+            if (!navigator.geolocation) return resolve({ lat: 0, lng: 0, acc: 0 });
             navigator.geolocation.getCurrentPosition(
-                (pos) => resolve({
-                    lat: pos.coords.latitude,
-                    lng: pos.coords.longitude,
-                    acc: pos.coords.accuracy
-                }),
-                () => resolve(defaultLoc),
-                { enableHighAccuracy: true, timeout: 1000 }
+                (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }),
+                () => resolve({ lat: 0, lng: 0, acc: 0 }),
+                { timeout: 5000 }
             );
         });
-        
-        const gpsData = await getGPS(); // Dùng biến này thay thế
 
-        // 4. Chuẩn bị Payload gửi lên Google Apps Script
+        const gpsCoords = await getGPS();
+        // 3. Chuẩn bị Payload gửi lên Google Apps Script
         const payload = {
             action: "saveRecord",
             deviceID: deviceId,
             employeeID: staffId,
             meterValue: meterValue,
-            image: base64Image, // Chuỗi base64 đã được nén từ lúc chụp
-            note: document.getElementById('note')?.value || "",
-            lat: gpsData.lat,
-            lng: gpsData.lng,
-            acc: gpsData.acc
+            image: base64Image,
+            note: document.getElementById('note').value,
+            lat: gpsCoords.lat,
+            lng: gpsCoords.lng,
+            acc: gpsCoords.acc
         };
-
-        // 5. Gọi API
+        // 4. Gọi API
         const response = await fetch(API_URL, {
             method: "POST",
             body: JSON.stringify(payload)
         });
-
         const res = await response.json();
 
         if (res.success) {
-            await Swal.fire({
-                icon: 'success',
-                title: 'Thành công!',
-                text: 'Dữ liệu đã được lưu vào hệ thống.',
-                timer: 1000
-            });
-            window.location.reload(true); // Reset form sau khi gửi thành công
+            await Swal.fire('Thành công', 'Dữ liệu đã được lưu!', 'success');
+            window.location.reload(true); // Đã thêm window. để xác định rõ hàm hệ thống
         } else {
-            throw new Error(res.message || "Lỗi không xác định từ Server");
+            throw new Error(res.message);
         }
-
-    } catch (error) {
-        console.error("Lỗi Upload:", error);
-        Swal.fire('Lỗi hệ thống', 'Không thể gửi dữ liệu. Vui lòng kiểm tra kết nối mạng!', 'error');
+    } catch (err) {
+        Swal.fire('Lỗi', err.message || 'Lỗi kết nối', 'error');
     } finally {
         showLoading(false);
     }
@@ -295,3 +308,5 @@ async function callAPI(payload) {
         throw error;
     }
 }
+
+
