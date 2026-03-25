@@ -273,7 +273,7 @@ async function uploadData() {
 
         if (res.success) {
             await Swal.fire('Thành công', 'Dữ liệu đã được lưu!', 'success');
-            window.location.reload(true); // Đã thêm window. để xác định rõ hàm hệ thống
+            window.location.reload(); // Đã thêm window. để xác định rõ hàm hệ thống
         } else {
             throw new Error(res.message);
         }
