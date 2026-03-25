@@ -10,7 +10,7 @@ async function handleLogin() {
         sessionStorage.setItem('staffId', id);
         sessionStorage.setItem('staffName', res.name);
         sessionStorage.setItem('staffRole', res.role);
-        window.location.reload();
+        window.location.reload(true);
     } else {
         alert(res.message);
     }
