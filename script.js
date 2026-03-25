@@ -280,22 +280,83 @@ document.getElementById('camInput')?.addEventListener('change', function(e) {
 
 // --- GỬI DỮ LIỆU ---
 async function uploadData() {
-    const btn = document.getElementById('btnSubmit');
-    btn.disabled = true;
-    btn.innerText = "Đang gửi...";
+    // 1. Kiểm tra dữ liệu đầu vào cơ bản
+    const deviceId = document.getElementById('deviceId').value;
+    const meterValue = document.getElementById('meterValue').value;
+    const staffId = sessionStorage.getItem('employeeID'); // Lấy từ session khi login
 
-   /* const data = {
-        action: "saveRecord",
-        deviceId: document.getElementById('deviceId').value,
-        value: document.getElementById('meterValue').value,
-        image: base64Image,
-        staffId: sessionStorage.getItem('staffId')
-    };
+    if (!deviceId || !meterValue) {
+        return Swal.fire('Thông báo', 'Vui lòng nhập đầy đủ Mã thiết bị và Chỉ số!', 'warning');
+    }
 
-    const res = await callAPI(data);
-    alert(res.message + (res.aiResult ? "\nAI đọc được: " + res.aiResult : ""));
-    location.reload();*/
+    if (!base64Image) {
+        return Swal.fire('Thông báo', 'Vui lòng chụp ảnh đồng hồ!', 'warning');
+    }
 
+    // 2. Hiện hiệu ứng chờ (Hàm showLoading đã thêm ở bước trước)
+    showLoading(true);
+
+    try {
+        // 3. Lấy tọa độ GPS (Hỗ trợ truy vết vị trí ghi số)
+        let location = { lat: 0, lng: 0, acc: 0 };
+        
+        const getGPS = () => new Promise((resolve) => {
+            if (!navigator.geolocation) return resolve(location);
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude,
+                    acc: pos.coords.accuracy
+                }),
+                () => resolve(location), // Nếu lỗi/từ chối thì trả về 0
+                { enableHighAccuracy: true, timeout: 5000 }
+            );
+        });
+
+        const gpsData = await getGPS();
+
+        // 4. Chuẩn bị Payload gửi lên Google Apps Script
+        const payload = {
+            action: "saveRecord",
+            deviceID: deviceId,
+            employeeID: staffId,
+            meterValue: meterValue,
+            image: base64Image, // Chuỗi base64 đã được nén từ lúc chụp
+            note: document.getElementById('note')?.value || "",
+            lat: gpsData.lat,
+            lng: gpsData.lng,
+            acc: gpsData.acc
+        };
+
+        // 5. Gọi API
+        const response = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+
+        const res = await response.json();
+
+        if (res.success) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Dữ liệu đã được lưu vào hệ thống.',
+                timer: 2000
+            });
+            location.reload(); // Reset form sau khi gửi thành công
+        } else {
+            throw new Error(res.message || "Lỗi không xác định từ Server");
+        }
+
+    } catch (error) {
+        console.error("Lỗi Upload:", error);
+        Swal.fire('Lỗi hệ thống', 'Không thể gửi dữ liệu. Vui lòng kiểm tra kết nối mạng!', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+/*
+async function uploadData() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((pos) => {
             const extraData = {
@@ -306,6 +367,10 @@ async function uploadData() {
             sendToServer(extraData);
         }, () => sendToServer({})); // Gửi không có GPS nếu người dùng từ chối
     }
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.innerText = "Đang gửi...";
+    
     
     const payload = {
         action: "saveRecord",
@@ -330,7 +395,7 @@ async function uploadData() {
         Swal.fire('Lỗi', 'Không thể kết nối với server Google', 'error');
     }
 }
-
+*/
 // --- HÀM GỌI API CHUNG ---
 async function callAPI(payload) {
     try {
