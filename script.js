@@ -60,7 +60,7 @@ function showApp() {
 /**
  * TỐI ƯU 3: Tải song song dữ liệu Dashboard và Logs
  */
-async function loadAdminDashboard() {
+/*async function loadAdminDashboard() {
     showLoading(true); // Hiển thị spinner
     
     try {
@@ -86,8 +86,64 @@ async function loadAdminDashboard() {
     } finally {
         showLoading(false);
     }
-}
+}*/
+async function loadAdminDashboard() {
+    showLoading(true); 
+    
+    try {
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: "getAdminData" }) 
+        });
+        const data = await response.json();
 
+        // 1. Cập nhật các con số Thống kê
+        if (data.stats) {
+            document.getElementById('count-active').innerText = data.stats.totalDevices;
+            document.getElementById('count-broken').innerText = data.stats.brokenCount;
+            document.getElementById('count-water').innerText = data.stats.waterCount;
+        }
+
+        // 2. Đổ dữ liệu vào bảng Logs (MeterReadings)
+        const logsBody = document.getElementById('logsBody');
+        logsBody.innerHTML = ""; 
+
+        // Bỏ dòng tiêu đề (slice(1)) và đảo ngược để hiện cái mới nhất lên đầu
+        const rows = data.logs.slice(1).reverse(); 
+
+        rows.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${new Date(row[3]).toLocaleString('vi-VN')}</td>
+                <td><span class="badge bg-info">${row[1]}</span></td>
+                <td>${row[2]}</td>
+                <td class="fw-bold">${row[4]} m³</td>
+                <td>
+                    ${row[5] !== "No Image" 
+                        ? `<img src="${row[5]}" style="width:40px; border-radius:4px; cursor:pointer" onclick="window.open('${row[5]}')">` 
+                        : "---"}
+                </td>
+                <td><span class="badge ${row[7] === 'Hoàn thành' ? 'bg-success' : 'bg-warning'}">${row[7]}</span></td>
+            `;
+            logsBody.appendChild(tr);
+        });
+
+        // 3. Khởi tạo/Làm mới DataTable
+        if ($.fn.DataTable.isDataTable('#logsTable')) {
+            $('#logsTable').DataTable().destroy();
+        }
+        $('#logsTable').DataTable({
+            order: [[0, 'desc']],
+            language: { url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json" }
+        });
+
+    } catch (error) {
+        console.error("Lỗi:", error);
+        Swal.fire('Lỗi', 'Không thể tải dữ liệu từ máy chủ', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
 function renderLogsTable(data) {
     const tableBody = document.getElementById('logsBody');
     // Dùng DocumentFragment để tối ưu việc chèn hàng nghìn dòng vào DOM
