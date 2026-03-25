@@ -54,7 +54,7 @@ function showApp() {
   function goToAdmin() {
     const currentUrl = window.location.href;
     // Thay url_web_app_admin bằng link Deploy của file Admin.html
-    const adminUrl = currentUrl + "?p=admin"; 
+    const adminUrl = currentUrl + "admin.html"; 
     window.location.href = adminUrl;
   }
 
