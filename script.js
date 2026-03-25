@@ -42,15 +42,18 @@ function showApp() {
         cancelButtonText: 'Ở lại nhập liệu'
       }).then((result) => {
         if (result.isConfirmed) {
-          goToAdmin();
+          goToAdmin(window.location.href);
         }
       });
     }
   }
-  function goToAdmin() {
-    const currentUrl = window.location.href;
+  function goToAdmin(currentUrl) {
+    if(currentUrl.indexOf("index")!=-1)
+        currentUrl = currentUrl.replace("index","admin");
+      else
+        currentUrl += "admin.html";
     // Thay url_web_app_admin bằng link Deploy của file Admin.html
-    const adminUrl = currentUrl + "admin.html"; 
+    const adminUrl = currentUrl; 
     window.location.href = adminUrl;
   }
 
