@@ -48,7 +48,7 @@ function showApp() {
     }
   }
   function goToAdmin(currentUrl) {
-    if(currentUrl.indexOf("index")!=-1)
+    if(currentUrl.includes("index"))
         currentUrl = currentUrl.replace("index","admin");
       else
         currentUrl += "admin.html";
