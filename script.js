@@ -113,6 +113,21 @@ function renderLogsTable(data) {
         $('#logsTable').DataTable({ pageLength: 10, order: [[0, "desc"]] });
     }
 }
+// Hàm hiển thị/ẩn hiệu ứng Loading
+function showLoading(isLoading) {
+    if (isLoading) {
+        Swal.fire({
+            title: 'Đang xử lý...',
+            html: 'Vui lòng chờ trong giây lát',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    } else {
+        Swal.close();
+    }
+}
 // --- Load dữ liệu tại trang Admin
 /*async function loadAdminDashboard() {
     try {
@@ -261,13 +276,6 @@ async function uploadData() {
 }
 
 // --- HÀM GỌI API CHUNG ---
-/*async function callAPI(payload) {
-    const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
-    });
-    return await response.json();
-}*/
 async function callAPI(payload) {
     try {
         const response = await fetch(API_URL, {
