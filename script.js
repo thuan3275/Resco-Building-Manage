@@ -341,9 +341,9 @@ async function uploadData() {
                 icon: 'success',
                 title: 'Thành công!',
                 text: 'Dữ liệu đã được lưu vào hệ thống.',
-                timer: 2000
+                timer: 1000
             });
-            location.reload(); // Reset form sau khi gửi thành công
+            location.reload(true); // Reset form sau khi gửi thành công
         } else {
             throw new Error(res.message || "Lỗi không xác định từ Server");
         }
