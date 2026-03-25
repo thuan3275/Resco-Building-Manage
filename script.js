@@ -1,4 +1,4 @@
-const API_URL = "AKfycbwn6nIqNxEliqlnRBHwVoxoEA5ItvOxJpW5GdfPifq-6_uLSHVHA5tm-ydN4g_R6Tan";
+const API_URL = "https://script.google.com/macros/s/AKfycbwn6nIqNxEliqlnRBHwVoxoEA5ItvOxJpW5GdfPifq-6_uLSHVHA5tm-ydN4g_R6Tan/exec";
 
 // --- XỬ LÝ ĐĂNG NHẬP ---
 async function handleLogin() {
