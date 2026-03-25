@@ -282,10 +282,10 @@ async function callAPI(payload) {
         // Lưu ý: Với mode 'no-cors', bạn không thể đọc nội dung trả về trực tiếp.
         // Để vừa ghi được dữ liệu, vừa đọc được phản hồi, hãy dùng cách dưới đây:
         
-        const resp = await fetch(API_URL, {
+       /* const resp = await fetch(API_URL, {
             method: "POST",
             body: JSON.stringify(payload)
-        });
+        });*/
         return await resp.json();
     } catch (error) {
         console.error("Lỗi kết nối API:", error);
