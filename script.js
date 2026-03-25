@@ -11,7 +11,8 @@ async function handleLogin() {
         sessionStorage.setItem('staffName', res.name);
         sessionStorage.setItem('staffRole', res.role);
         alert("Thành công nhập mã!");
-        location.reload(true);
+        showApp();
+        //location.reload(true);
     } else {
         alert(res.message);
     }
