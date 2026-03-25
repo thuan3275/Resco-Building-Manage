@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Trị Hệ Thống</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark px-3">
+        <span class="navbar-brand">Hệ Thống Quản Lý Thiết Bị</span>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()">Đăng xuất</button>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row mb-4 text-white">
+            <div class="col-md-4">
+                <div class="card bg-primary p-3 shadow-sm border-0">
+                    <h6>Thiết bị hoạt động</h6>
+                    <h2 id="count-active">0</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-danger p-3 shadow-sm border-0">
+                    <h6>Cần sửa chữa</h6>
+                    <h2 id="count-broken">0</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success p-3 shadow-sm border-0">
+                    <h6>Số khối nước tháng này</h6>
+                    <h2 id="count-water">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm p-4">
+            <h5 class="mb-3">Lịch sử ghi nhận gần nhất</h5>
+            <table id="logsTable" class="table table-striped w-100">
+                <thead>
+                    <tr>
+                        <th>Thời gian</th><th>Mã TB</th><th>Nhân viên</th><th>Chỉ số</th><th>Ảnh</th><th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody id="logsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Kiểm tra quyền Admin khi vào trang
+        if(sessionStorage.getItem('staffRole') !== 'Admin') {
+            alert("Bạn không có quyền!"); window.location.href = "index.html";
+        }
+        $(document).ready(() => loadAdminDashboard());
+    </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghi Chỉ Số Nước</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loginSection" class="container mt-5">
+        <div class="card shadow p-4 text-center">
+            <i class="fa fa-user-circle fa-4 line-primary mb-3 text-primary" style="font-size: 4rem;"></i>
+            <h3>Đăng Nhập</h3>
+            <input type="text" id="staffId" class="form-control my-3" placeholder="Nhập mã nhân viên">
+            <button class="btn btn-primary w-100 py-2" onclick="handleLogin()">XÁC NHẬN</button>
+        </div>
+    </div>
+
+    <div id="appSection" class="container mt-3" style="display:none;">
+        <div id="userInfo" class="alert alert-light border d-flex justify-content-between align-items-center"></div>
+        
+        <div class="mb-3">
+            <label class="form-label fw-bold">Mã Thiết bị (ID)</label>
+            <input type="text" id="deviceId" class="form-control" placeholder="Quét hoặc nhập mã">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Chỉ số nước</label>
+            <input type="number" id="meterValue" class="form-control" placeholder="Nhập số khối">
+        </div>
+
+        <div class="camera-container text-center p-4 border-dashed mb-3" onclick="document.getElementById('camInput').click()">
+            <i class="fa fa-camera fa-2x mb-2 text-secondary"></i>
+            <p class="text-secondary">Chụp ảnh đồng hồ</p>
+            <input type="file" id="camInput" accept="image/*" capture="environment" hidden>
+            <img id="preview" class="img-fluid rounded mt-2 shadow-sm" style="display:none;">
+        </div>
+
+        <button class="btn btn-success w-100 py-3 fw-bold" id="btnSubmit" onclick="uploadData()">GỬI DỮ LIỆU</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="script.js"></script>
+</body>
+</html>
