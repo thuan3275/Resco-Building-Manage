@@ -127,65 +127,7 @@ async function loadAdminDashboard() {
         showLoading(false);
     }
 }
-/*
-async function loadAdminDashboard() {
-    showLoading(true); 
-    
-    try {
-        const response = await fetch(API_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({ action: "getAdminData" }) 
-        });
-        const data = await response.json();
 
-        // 1. Cập nhật các con số Thống kê
-        if (data.stats) {
-            document.getElementById('count-active').innerText = data.stats.totalDevices;
-            document.getElementById('count-broken').innerText = data.stats.brokenCount;
-            document.getElementById('count-water').innerText = data.stats.waterCount;
-        }
-
-        // 2. Đổ dữ liệu vào bảng Logs (MeterReadings)
-        const logsBody = document.getElementById('logsBody');
-        logsBody.innerHTML = ""; 
-
-        // Bỏ dòng tiêu đề (slice(1)) và đảo ngược để hiện cái mới nhất lên đầu
-        const rows = data.logs.slice(1).reverse(); 
-
-        rows.forEach(row => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${new Date(row[3]).toLocaleString('vi-VN')}</td>
-                <td><span class="badge bg-info">${row[1]}</span></td>
-                <td>${row[2]}</td>
-                <td class="fw-bold">${row[4]} m³</td>
-                <td>
-                    ${row[5] !== "No Image" 
-                        ? `<img src="${row[5]}" style="width:40px; border-radius:4px; cursor:pointer" onclick="window.open('${row[5]}')">` 
-                        : "---"}
-                </td>
-                <td><span class="badge ${row[7] === 'Hoàn thành' ? 'bg-success' : 'bg-warning'}">${row[7]}</span></td>
-            `;
-            logsBody.appendChild(tr);
-        });
-
-        // 3. Khởi tạo/Làm mới DataTable
-        if ($.fn.DataTable.isDataTable('#logsTable')) {
-            $('#logsTable').DataTable().destroy();
-        }
-        $('#logsTable').DataTable({
-            order: [[0, 'desc']],
-            language: { url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json" }
-        });
-
-    } catch (error) {
-        console.error("Lỗi:", error);
-        Swal.fire('Lỗi', 'Không thể tải dữ liệu từ máy chủ', 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-*/
 function renderLogsTable(data) {
     const tableBody = document.getElementById('logsBody');
     // Dùng DocumentFragment để tối ưu việc chèn hàng nghìn dòng vào DOM
@@ -226,75 +168,6 @@ function showLoading(isLoading) {
         Swal.close();
     }
 }
-// --- Load dữ liệu tại trang Admin
-/*async function loadAdminDashboard() {
-    try {
-        // 1. Gọi API để lấy toàn bộ dữ liệu từ Google Apps Script
-        const response = await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "getAdminData" })
-        });
-        const data = await response.json();
-
-        if (!data || !data.logs) {
-            console.error("Không có dữ liệu trả về");
-            return;
-        }
-
-        // 2. Cập nhật các con số trên Dashboard (Thẻ màu)
-        const stats = data.stats;
-        document.getElementById('count-active').innerText = stats.totalDevices;
-        document.getElementById('count-broken').innerText = stats.brokenCount;
-        document.getElementById('count-water').innerText = stats.waterCount;
-
-        // 3. Xử lý dữ liệu bảng Logs
-        const logsBody = document.getElementById('logsBody');
-        logsBody.innerHTML = ""; // Xóa dữ liệu cũ
-
-        // data.logs[0] thường là Header, chúng ta lấy từ dòng index 1
-        const rows = data.logs.slice(1); 
-
-        rows.forEach(row => {
-            const tr = document.createElement('tr');
-            
-            // Định dạng ngày tháng cho dễ nhìn
-            const date = new Date(row[0]).toLocaleString('vi-VN');
-            const deviceId = row[1];
-            const staffName = row[2];
-            const value = row[3];
-            const imgUrl = row[4];
-            const status = row[5];
-
-            tr.innerHTML = `
-                <td>${date}</td>
-                <td><span class="badge bg-secondary">${deviceId}</span></td>
-                <td>${staffName}</td>
-                <td class="fw-bold text-primary">${value} m³</td>
-                <td>
-                    ${imgUrl !== "No Image" 
-                        ? `<img src="${imgUrl}" class="img-thumbnail" style="width:50px; cursor:pointer" onclick="window.open('${imgUrl}')">` 
-                        : "N/A"}
-                </td>
-                <td><span class="badge ${status.includes('Lỗi') ? 'bg-danger' : 'bg-success'}">${status}</span></td>
-            `;
-            logsBody.appendChild(tr);
-        });
-
-        // 4. Kích hoạt DataTables để hỗ trợ tìm kiếm/phân trang
-        $('#logsTable').DataTable({
-            destroy: true, // Hỗ trợ tải lại dữ liệu mà không lỗi
-            order: [[0, 'desc']], // Mới nhất hiện lên đầu
-            language: {
-                url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json"
-            }
-        });
-
-    } catch (error) {
-        console.error("Lỗi khi tải Dashboard:", error);
-        Swal.fire('Lỗi', 'Không thể kết nối dữ liệu Database', 'error');
-    }
-}
-*/
 // --- CHỤP & NÉN ẢNH ---
 let base64Image = "";
 document.getElementById('camInput')?.addEventListener('change', function(e) {
@@ -340,22 +213,22 @@ async function uploadData() {
 
     try {
         // 3. Lấy tọa độ GPS (Hỗ trợ truy vết vị trí ghi số)
-        let location = { lat: 0, lng: 0, acc: 0 };
-        
         const getGPS = () => new Promise((resolve) => {
-            if (!navigator.geolocation) return resolve(location);
+            let defaultLoc = { lat: 0, lng: 0, acc: 0 }; // Đổi tên ở đây
+            if (!navigator.geolocation) return resolve(defaultLoc);
+            
             navigator.geolocation.getCurrentPosition(
                 (pos) => resolve({
                     lat: pos.coords.latitude,
                     lng: pos.coords.longitude,
                     acc: pos.coords.accuracy
                 }),
-                () => resolve(location), // Nếu lỗi/từ chối thì trả về 0
-                { enableHighAccuracy: true, timeout: 5000 }
+                () => resolve(defaultLoc),
+                { enableHighAccuracy: true, timeout: 1000 }
             );
         });
-
-        const gpsData = await getGPS();
+        
+        const gpsData = await getGPS(); // Dùng biến này thay thế
 
         // 4. Chuẩn bị Payload gửi lên Google Apps Script
         const payload = {
@@ -385,7 +258,7 @@ async function uploadData() {
                 text: 'Dữ liệu đã được lưu vào hệ thống.',
                 timer: 1000
             });
-            location.reload(true); // Reset form sau khi gửi thành công
+            window.location.reload(true); // Reset form sau khi gửi thành công
         } else {
             throw new Error(res.message || "Lỗi không xác định từ Server");
         }
