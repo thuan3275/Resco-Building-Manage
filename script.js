@@ -25,7 +25,7 @@ function showApp() {
     document.getElementById('appSection').style.display = 'block';
     
     // Hiển thị lời chào và nút Đăng xuất
-    const showInfo = "<div class='alert alert-info d-flex justify-content-between align-items-center'>";
+    let showInfo = "<div class='alert alert-info d-flex justify-content-between align-items-center'>";
     showInfo += "<span>Chào, <b> ";
     showInfo += name ;
     showInfo +="</b> ( ";
