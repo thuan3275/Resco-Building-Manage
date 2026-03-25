@@ -314,4 +314,13 @@ async function callAPI(payload) {
     }
 }
 
-
+function logout() {
+    console.log("Đang đăng xuất...");
+    sessionStorage.removeItem('employeeID');
+    sessionStorage.removeItem('staffName');
+    sessionStorage.removeItem('staffRole');
+    sessionStorage.clear(); // Xóa sạch tất cả
+    
+    // Ép buộc trình duyệt quay về trạng thái ban đầu
+    window.location.replace(window.location.pathname); 
+}
