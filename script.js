@@ -16,7 +16,51 @@ async function handleLogin() {
         alert(res.message);
     }
 }
+function showApp() { 
+    const role = sessionStorage.getItem('staffRole');
+    const name = sessionStorage.getItem('staffName');
 
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('appSection').style.display = 'block';
+    
+    // Hiển thị lời chào và nút Đăng xuất
+    document.getElementById('userInfo').innerHTML = `
+      <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <span>Chào, <b>${name}</b> (${role})</span>
+        <button class="btn btn-sm btn-outline-danger" onclick="logout()">Đăng xuất</button>
+      </div>
+    `;
+
+    // Nếu là Admin, hiển thị thêm nút chuyển hướng nhanh
+    if (role === 'Admin' || role === 'Quản lý') {
+      document.getElementById('adminLink').style.display = 'block';
+      
+      // Tùy chọn: Tự động hỏi có muốn vào trang Admin không
+      Swal.fire({
+        title: 'Chào Admin!',
+        text: 'Bạn có muốn chuyển sang trang Quản lý không?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Vào Admin',
+        cancelButtonText: 'Ở lại nhập liệu'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          goToAdmin();
+        }
+      });
+    }
+  }
+  function goToAdmin() {
+    const currentUrl = window.location.href;
+    // Thay url_web_app_admin bằng link Deploy của file Admin.html
+    const adminUrl = currentUrl + "?p=admin"; 
+    window.location.href = adminUrl;
+  }
+
+  //function logout() {
+  //  sessionStorage.clear(); // Xóa sạch bộ nhớ phiên
+  //  location.reload(true);      // Tải lại trang để về màn hình đăng nhập
+  //}
 // --- CHỤP & NÉN ẢNH ---
 let base64Image = "";
 document.getElementById('camInput')?.addEventListener('change', function(e) {
