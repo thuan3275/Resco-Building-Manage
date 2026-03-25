@@ -193,10 +193,34 @@ async function uploadData() {
 }
 
 // --- HÀM GỌI API CHUNG ---
-async function callAPI(payload) {
+/*async function callAPI(payload) {
     const response = await fetch(API_URL, {
         method: "POST",
         body: JSON.stringify(payload)
     });
     return await response.json();
+}*/
+async function callAPI(payload) {
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            mode: "no-cors", // Thêm dòng này để bỏ qua kiểm tra CORS nghiêm ngặt
+            headers: {
+                "Content-Type": "text/plain", // Đổi từ application/json sang text/plain
+            },
+            body: JSON.stringify(payload)
+        });
+
+        // Lưu ý: Với mode 'no-cors', bạn không thể đọc nội dung trả về trực tiếp.
+        // Để vừa ghi được dữ liệu, vừa đọc được phản hồi, hãy dùng cách dưới đây:
+        
+        const resp = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        return await resp.json();
+    } catch (error) {
+        console.error("Lỗi kết nối API:", error);
+        throw error;
+    }
 }
