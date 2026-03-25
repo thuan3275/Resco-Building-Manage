@@ -57,36 +57,77 @@ function showApp() {
     const adminUrl = currentUrl; 
     window.location.href = adminUrl;
   }
-/**
- * TỐI ƯU 3: Tải song song dữ liệu Dashboard và Logs
- */
-/*async function loadAdminDashboard() {
-    showLoading(true); // Hiển thị spinner
+async function loadAdminDashboard() {
+    showLoading(true); 
     
     try {
-        // Tải song song (Parallel Fetching)
-        const [statsResponse, logsResponse] = await Promise.all([
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "getDashboardStats" }) }),
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "readData", sheetName: "MeterReadings" }) })
-        ]);
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: "getAdminData" }) 
+        });
+        
+        if (!response.ok) throw new Error("Mất kết nối với máy chủ Google");
+        
+        const data = await response.json();
 
-        const stats = await statsResponse.json();
-        const logsData = await logsResponse.json();
+        // KIỂM TRA DỮ LIỆU ĐẦU VÀO (Sửa lỗi slice ở đây)
+        if (!data || !data.logs || !Array.isArray(data.logs)) {
+            console.error("Dữ liệu logs không hợp lệ:", data);
+            return Swal.fire('Thông báo', 'Bảng dữ liệu đang trống hoặc bị sai cấu trúc!', 'info');
+        }
 
-        // Hiển thị Stats
-        document.getElementById('dash-total').innerText = stats.totalDevices;
-        document.getElementById('dash-broken').innerText = stats.brokenCount;
-        document.getElementById('dash-water').innerText = stats.waterCount;
+        // Cập nhật thống kê
+        if (data.stats) {
+            document.getElementById('count-active').innerText = data.stats.totalDevices || 0;
+            document.getElementById('count-broken').innerText = data.stats.brokenCount || 0;
+            document.getElementById('count-water').innerText = data.stats.waterCount || 0;
+        }
 
-        // Render Table (Tối ưu: Chỉ render 50 bản ghi mới nhất trước)
-        renderLogsTable(logsData.slice(1).reverse().slice(0, 50));
+        const logsBody = document.getElementById('logsBody');
+        logsBody.innerHTML = ""; 
+
+        // CHỈ CHẠY SLICE KHI CHẮC CHẮN CÓ DỮ LIỆU
+        // Nếu chỉ có 1 dòng (dòng tiêu đề) thì không hiện gì
+        if (data.logs.length <= 1) {
+            logsBody.innerHTML = "<tr><td colspan='6' class='text-center'>Chưa có dữ liệu ghi chép</td></tr>";
+        } else {
+            const rows = data.logs.slice(1).reverse(); 
+
+            rows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row[3] ? new Date(row[3]).toLocaleString('vi-VN') : '---'}</td>
+                    <td><span class="badge bg-info">${row[1] || 'N/A'}</span></td>
+                    <td>${row[2] || '---'}</td>
+                    <td class="fw-bold">${row[4] || 0} m³</td>
+                    <td>
+                        ${(row[5] && row[5] !== "No Image") 
+                            ? `<img src="${row[5]}" style="width:40px; border-radius:4px; cursor:pointer" onclick="window.open('${row[5]}')">` 
+                            : "---"}
+                    </td>
+                    <td><span class="badge ${row[7] === 'Hoàn thành' ? 'bg-success' : 'bg-warning'}">${row[7] || 'Chờ'}</span></td>
+                `;
+                logsBody.appendChild(tr);
+            });
+        }
+
+        // Khởi tạo DataTable
+        if ($.fn.DataTable.isDataTable('#logsTable')) {
+            $('#logsTable').DataTable().destroy();
+        }
+        $('#logsTable').DataTable({
+            order: [[0, 'desc']],
+            language: { url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json" }
+        });
 
     } catch (error) {
-        console.error("Lỗi tải dữ liệu:", error);
+        console.error("Lỗi Dashboard:", error);
+        Swal.fire('Lỗi', 'Không thể hiển thị dữ liệu: ' + error.message, 'error');
     } finally {
         showLoading(false);
     }
-}*/
+}
+/*
 async function loadAdminDashboard() {
     showLoading(true); 
     
@@ -144,6 +185,7 @@ async function loadAdminDashboard() {
         showLoading(false);
     }
 }
+*/
 function renderLogsTable(data) {
     const tableBody = document.getElementById('logsBody');
     // Dùng DocumentFragment để tối ưu việc chèn hàng nghìn dòng vào DOM
