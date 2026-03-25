@@ -285,8 +285,8 @@ async function callAPI(payload) {
        /* const resp = await fetch(API_URL, {
             method: "POST",
             body: JSON.stringify(payload)
-        });*/
-        return await resp.json();
+        });
+        return await resp.json();*/
     } catch (error) {
         console.error("Lỗi kết nối API:", error);
         throw error;
